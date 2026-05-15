@@ -62,10 +62,26 @@ def _list_papers(conference: str, year: str) -> list[dict]:
 
     Returns list of dicts with: title, authors, pdf_url, supp_url,
     arxiv_url, bibtex, paper_html_path, pages.
+
+    Multi-day conferences (e.g. CVPR 2018/2019/2020) reject ``?day=all``
+    with an SQL error; in that case we enumerate the day values from the
+    year's index page and concatenate the listings.
     """
     url = f"{BASE_URL}/{conference}{year}?day=all"
     resp = _fetch_with_retry(url)
     html = resp.text
+
+    if "Incorrect DATE value: 'all'" in html:
+        logger.info("  %s %s: ?day=all rejected, enumerating per-day listings",
+                    conference, year)
+        index_resp = _fetch_with_retry(f"{BASE_URL}/{conference}{year}.py")
+        days = sorted(set(re.findall(r"day=([0-9]{4}-[0-9]{2}-[0-9]{2})", index_resp.text)))
+        if not days:
+            return []
+        html = ""
+        for day in days:
+            day_resp = _fetch_with_retry(f"{BASE_URL}/{conference}{year}?day={day}")
+            html += day_resp.text
 
     papers = []
 

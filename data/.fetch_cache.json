@@ -145,6 +145,8 @@
     "jmlr-v26",
     "neurips-2024",
     "openreview-iclr-2025",
+    "openreview-iclr-2026",
+    "openreview-midl-2025",
     "openreview-tmlr-journal",
     "pmlr-v227",
     "pmlr-v229",
@@ -152,7 +154,10 @@
     "pmlr-v238",
     "pmlr-v244",
     "pmlr-v247",
+    "pmlr-v304",
+    "pmlr-v315",
+    "pmlr-v330",
     "wacv-2025"
   ],
-  "updated": "2026-02-19T03:26:18.852717"
+  "updated": "2026-05-15T11:45:25.003846"
 }

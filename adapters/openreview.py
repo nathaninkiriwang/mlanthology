@@ -23,11 +23,13 @@ logger = logging.getLogger(__name__)
 VENUE_FULLNAMES = {
     "ICLR": "International Conference on Learning Representations",
     "TMLR": "Transactions on Machine Learning Research",
+    "MIDL": "Medical Imaging with Deep Learning",
 }
 
 # Format: (venue_id, venue_shortname, year, api_version)
 # year="all" means a rolling venue — fetch all and split by publication year
 KNOWN_VENUES = [
+    ("ICLR.cc/2026/Conference", "ICLR", "2026", "v2"),
     ("ICLR.cc/2025/Conference", "ICLR", "2025", "v2"),
     ("ICLR.cc/2024/Conference", "ICLR", "2024", "v2"),
     ("ICLR.cc/2023/Conference", "ICLR", "2023", "v1_venueid"),
@@ -36,6 +38,7 @@ KNOWN_VENUES = [
     ("ICLR.cc/2020/Conference", "ICLR", "2020", "v1_venueid"),
     ("ICLR.cc/2019/Conference", "ICLR", "2019", "v1_decision"),
     ("ICLR.cc/2018/Conference", "ICLR", "2018", "v1_decision"),
+    ("MIDL.io/2025/Conference", "MIDL", "2025", "v2"),
     ("TMLR", "TMLR", "all", "v2_journal"),
 ]
 

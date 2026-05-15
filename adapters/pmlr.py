@@ -8,12 +8,16 @@ Volume metadata lives in _config.yml.
 import re
 import logging
 from functools import partial
+from html import unescape
 from pathlib import Path
 from typing import Optional, Union
 
 import yaml
 
-from .common import make_bibtex_key, resolve_bibtex_collisions, normalize_paper, write_venue_json
+from .common import (
+    make_bibtex_key, resolve_bibtex_collisions, normalize_paper, write_venue_json,
+    parse_author_name, strip_html,
+)
 from .http import fetch_with_retry as _fetch_with_retry, fetch_parallel
 from .cache import should_fetch, mark_fetched
 
@@ -21,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 GITHUB_API = "https://api.github.com"
 GITHUB_RAW = "https://raw.githubusercontent.com/mlresearch"
+PMLR_WEB = "https://proceedings.mlr.press"
 
 
 # Known PMLR volumes for major venues.
@@ -85,7 +90,8 @@ KNOWN_VOLUMES = [
     (30, "COLT", "2013"),
     (23, "COLT", "2012"),
     (19, "COLT", "2011"),
-    # ACML (legacy — 2009 not on PMLR; 2010-2024 from PMLR)
+    # ACML (legacy — 2009 not on PMLR; 2010-2025 from PMLR)
+    (304, "ACML", "2025"),
     (260, "ACML", "2024"),
     (222, "ACML", "2023"),
     (189, "ACML", "2022"),
@@ -120,8 +126,11 @@ KNOWN_VOLUMES = [
     (87, "CoRL", "2018"),
     (78, "CoRL", "2017"),
     # MIDL
+    (315, "MIDL", "2026"),
     (250, "MIDL", "2024"),
     (172, "MIDL", "2023"),
+    # CoLLAs
+    (330, "CoLLAs", "2025"),
     # ALT (2017-2025 on PMLR; pre-2017 Springer LNAI via DBLP legacy)
     (272, "ALT", "2025"),
     (237, "ALT", "2024"),
@@ -254,8 +263,107 @@ def fetch_and_parse_post(volume: Union[int, str], filename: str, venue: str, yea
         return None
 
 
+def list_paper_ids_via_web(volume: Union[int, str]) -> list[str]:
+    """Scrape proceedings.mlr.press to list paper IDs in volume order.
+
+    Used as a fallback when the GitHub API is rate-limited.  The volume
+    landing page lists every paper twice (once as abs link, once as PDF
+    link); we dedupe while preserving first-occurrence order.
+    """
+    repo = _volume_repo(volume)
+    url = f"{PMLR_WEB}/{repo}/"
+    resp = _fetch_with_retry(url)
+    matches = re.findall(rf'/{repo}/([a-z0-9-]+)\.html', resp.text)
+    seen: set[str] = set()
+    paper_ids: list[str] = []
+    for pid in matches:
+        if pid not in seen:
+            seen.add(pid)
+            paper_ids.append(pid)
+    return paper_ids
+
+
+def fetch_and_parse_paper_html(
+    volume: Union[int, str], paper_id: str, venue: str, year: str, venue_name: str,
+) -> Optional[dict]:
+    """Fetch a single paper's PMLR HTML page and extract metadata.
+
+    Companion to ``fetch_and_parse_post`` that doesn't need the GitHub
+    API — uses the citation_* meta tags PMLR embeds in each paper page.
+    """
+    repo = _volume_repo(volume)
+    url = f"{PMLR_WEB}/{repo}/{paper_id}.html"
+    try:
+        resp = _fetch_with_retry(url)
+        html = resp.text
+
+        title_m = re.search(r'<meta name="citation_title" content="([^"]*)"', html)
+        title = unescape(title_m.group(1)) if title_m else ""
+        if not title:
+            return None
+
+        author_names = [
+            unescape(name)
+            for name in re.findall(r'<meta name="citation_author" content="([^"]*)"', html)
+        ]
+        authors = [parse_author_name(name) for name in author_names if name.strip()]
+        if not authors:
+            return None
+
+        pdf_m = re.search(r'<meta name="citation_pdf_url" content="([^"]*)"', html)
+        pdf_url = pdf_m.group(1) if pdf_m else ""
+
+        fp_m = re.search(r'<meta name="citation_firstpage" content="([^"]*)"', html)
+        lp_m = re.search(r'<meta name="citation_lastpage" content="([^"]*)"', html)
+        pages = f"{fp_m.group(1)}-{lp_m.group(1)}" if fp_m and lp_m else ""
+
+        abstract = ""
+        abs_m = re.search(
+            r'<div\s+id="abstract"[^>]*>(.*?)</div>', html, re.DOTALL,
+        )
+        if abs_m:
+            raw = abs_m.group(1).strip()
+            # PMLR wraps the abstract in `abstract = { ... }` BibTeX-style;
+            # unwrap if present, otherwise just strip HTML.
+            wrapped = re.match(r'abstract\s*=\s*\{(.*)\}\s*$', raw, re.DOTALL)
+            abstract = strip_html(wrapped.group(1) if wrapped else raw).strip()
+
+        bkey = make_bibtex_key(
+            first_author_family=authors[0].get("family", ""),
+            year=year,
+            venue=venue.lower(),
+            title=title,
+        )
+
+        return {
+            "bibtex_key": bkey,
+            "title": title,
+            "authors": authors,
+            "year": year,
+            "venue": venue.lower(),
+            "venue_name": venue_name,
+            "volume": str(volume),
+            "pages": pages,
+            "abstract": abstract,
+            "pdf_url": pdf_url,
+            "venue_url": url,
+            "openreview_url": "",
+            "code_url": "",
+            "source": "pmlr",
+            "source_id": f"{repo}/{paper_id}",
+        }
+    except Exception as e:
+        logger.warning(f"Failed to fetch {paper_id} via web: {e}")
+        return None
+
+
 def process_volume(volume: Union[int, str], venue: str, year: str) -> list[dict]:
-    """Process a single PMLR volume, returning a list of paper dicts."""
+    """Process a single PMLR volume, returning a list of paper dicts.
+
+    Prefers the YAML _posts/ path via the GitHub API; falls back to
+    scraping proceedings.mlr.press when the API is unavailable
+    (e.g. rate-limited).
+    """
     logger.info(f"Processing PMLR {_volume_repo(volume)} ({venue} {year})")
 
     try:
@@ -267,17 +375,36 @@ def process_volume(volume: Union[int, str], venue: str, year: str) -> list[dict]
     venue_name = config.get("booktitle", f"Proceedings of {venue} {year}")
     editors = config.get("editor", [])
 
+    via_web = False
+    post_files: list[str] = []
     try:
         post_files = list_posts(volume)
     except Exception as e:
-        logger.error(f"Failed to list posts for v{volume}: {e}")
-        return []
+        logger.warning(
+            f"GitHub API listing failed for v{volume} ({e}); "
+            f"falling back to proceedings.mlr.press scrape"
+        )
+        via_web = True
 
-    logger.info(f"  Fetching {len(post_files)} papers concurrently...")
-    _fetch = partial(fetch_and_parse_post, volume, venue=venue, year=year, venue_name=venue_name)
-    results = fetch_parallel(
-        post_files, _fetch, max_workers=20, default=None, progress_interval=100,
-    )
+    if via_web:
+        try:
+            paper_ids = list_paper_ids_via_web(volume)
+        except Exception as e:
+            logger.error(f"Web fallback also failed for v{volume}: {e}")
+            return []
+        logger.info(f"  Fetching {len(paper_ids)} papers concurrently via web...")
+        _fetch = partial(
+            fetch_and_parse_paper_html, volume, venue=venue, year=year, venue_name=venue_name,
+        )
+        results = fetch_parallel(
+            paper_ids, _fetch, max_workers=20, default=None, progress_interval=100,
+        )
+    else:
+        logger.info(f"  Fetching {len(post_files)} papers concurrently...")
+        _fetch = partial(fetch_and_parse_post, volume, venue=venue, year=year, venue_name=venue_name)
+        results = fetch_parallel(
+            post_files, _fetch, max_workers=20, default=None, progress_interval=100,
+        )
 
     papers = [p for p in results.values() if p is not None]
     bibtex_keys = [p["bibtex_key"] for p in papers]
