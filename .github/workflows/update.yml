@@ -95,6 +95,13 @@ jobs:
 
       - uses: ./.github/actions/setup
 
+      - name: Add swap space
+        run: |
+          sudo fallocate -l 8G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+
       - name: Pull latest data
         run: git pull --ff-only origin ${{ github.ref_name }}
 
