@@ -63,8 +63,9 @@ subprocess boundary it can log and an exit code it can branch on.
   zero teaches you something false about the field.
 - **Diagnostics come back with the results**: `total` (matches before your limit — the
   flooded-vs-thin signal), `dropped_terms` (terms the tokenizer could not index: `ℓ∞`
-  becomes nothing, spell it `linf`), `unfiltered_total` (present only when your *filters*
-  produced the zero, so you widen the box rather than reword), and `family_venues_absent`.
+  becomes nothing, spell it `linf`), `unfiltered_total` (what the same query
+  finds with the filters lifted, on any filtered search that came back empty — greater than
+  zero means the box did it, zero means the words did), and `family_venues_absent`.
 - **Families** save you remembering who publishes where: `core-ml`, `theory`, `vision`,
   `ai`, `robotics`, `health`, `graphs`, `causal`. `--family theory` sweeps COLT, ALT, UAI,
   ISIPTA, PGM and FTML in one call.
