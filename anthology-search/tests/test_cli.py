@@ -94,6 +94,15 @@ def test_filter_shutout_is_diagnosed(run):
     assert "filters cut this" in body["note"]
 
 
+def test_a_query_that_finds_nothing_anywhere_says_so(run):
+    """The opposite advice from a filter shutout, and the counts decide which is true."""
+    _, out, _ = run("search", "zzzznotaword", "--venue", "colt")
+    body = payload(out)
+    assert body["total"] == 0 and body["unfiltered_total"] == 0
+    assert "the terms, not the box" in body["note"]
+    assert "filters cut this" not in body["note"]
+
+
 def test_no_workshops_drops_workshop_papers(run):
     _, out, _ = run("search", "attention", "--no-workshops")
     assert "tyukin2024icmlw-attention" not in [h["citekey"] for h in payload(out)["hits"]]

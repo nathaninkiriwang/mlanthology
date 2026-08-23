@@ -126,9 +126,15 @@ def cmd_search(args) -> int:
         payload["family_venues_absent"] = absent
     if result.unfiltered_total is not None:
         payload["unfiltered_total"] = result.unfiltered_total
+        # The count decides which advice is true. Saying "the filters cut this" when the
+        # query finds nothing anywhere sends the searcher to widen a box that was never
+        # the problem, and costs them a whole rung.
         payload["note"] = (
             f"0 hits with filters, {result.unfiltered_total} without — the filters cut "
-            "this, not the query. Widen the venue/year box before rewording.")
+            "this, not the query. Widen the venue/year box before rewording."
+            if result.unfiltered_total
+            else "0 hits with or without the filters — the terms, not the box. Try "
+                 "synonyms or --any before widening scope.")
     _emit(payload)
     return EXIT_OK
 
