@@ -7,6 +7,7 @@ Supports ICLR, TMLR, and other venues hosted on OpenReview.
 
 import datetime
 import logging
+import os
 from pathlib import Path
 from typing import Optional
 
@@ -50,16 +51,26 @@ DECISION_INVITATIONS = {
 
 
 def _get_client_v2() -> openreview.api.OpenReviewClient:
-    """Create an OpenReview API V2 client (guest access)."""
+    """Create an OpenReview API V2 client.
+
+    Authenticates when OPENREVIEW_USERNAME/OPENREVIEW_PASSWORD are present, and
+    falls back to guest access when they are not. Guest access began returning
+    ChallengeRequiredError from datacenter IPs (observed 2026-07-01 and again
+    2026-08-27 on GitHub runners), which fails the whole fetch.
+    """
     return openreview.api.OpenReviewClient(
-        baseurl="https://api2.openreview.net"
+        baseurl="https://api2.openreview.net",
+        username=os.environ.get("OPENREVIEW_USERNAME") or None,
+        password=os.environ.get("OPENREVIEW_PASSWORD") or None,
     )
 
 
 def _get_client_v1() -> openreview.Client:
-    """Create an OpenReview API V1 client (guest access)."""
+    """Create an OpenReview API V1 client (authenticated when credentials exist)."""
     return openreview.Client(
-        baseurl="https://api.openreview.net"
+        baseurl="https://api.openreview.net",
+        username=os.environ.get("OPENREVIEW_USERNAME") or None,
+        password=os.environ.get("OPENREVIEW_PASSWORD") or None,
     )
 
 
