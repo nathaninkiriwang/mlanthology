@@ -172,7 +172,13 @@ def _bibtex(paper: dict) -> str:
     for name in ("volume", "number", "pages", "doi"):
         if value := paper.get(name):
             fields.append((name, value))
-    if url := (paper.get("anthology_url") or paper.get("url")):
+    # `anthology_url` is COMPUTED from venue/year/citekey, not verified, so it 404s for
+    # any paper the mlanthology site does not host. ACL Anthology imports live at
+    # aclanthology.org (measured: the computed permalink returns 404, the stored landing
+    # page 200), so for those the stored `url` is canonical. Every other venue keeps the
+    # site permalink it had.
+    site_hosts_it = paper.get("upstream_source") != "acl-anthology"
+    if url := ((paper.get("anthology_url") if site_hosts_it else "") or paper.get("url")):
         fields.append(("url", url))
     body = ",\n".join(f"  {k:<9} = {{{v}}}" for k, v in fields if v)
     return f"@{kind}{{{paper['citekey']},\n{body}\n}}"
