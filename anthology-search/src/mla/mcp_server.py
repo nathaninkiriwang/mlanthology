@@ -67,7 +67,7 @@ def mla_search(query: str, limit: int = 20, venues: str = "", family: str = "",
 
     venues:      comma-separated slugs, e.g. "neurips,icml" (see mla_venues)
     family:      comma-separated topical families instead of naming venues:
-                 core-ml, theory, vision, ai, robotics, health, graphs, causal
+                 core-ml, theory, vision, ai, robotics, health, graphs, causal, nlp
     venue_types: comma-separated subset of conference, journal, workshop
     author:      an author slug ("he-kaiming") or a name fragment
     any_terms:   OR the terms rather than AND — the widening rung when results are thin

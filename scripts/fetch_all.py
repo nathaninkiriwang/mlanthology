@@ -36,13 +36,14 @@ from adapters.jmlr import fetch_all as jmlr_fetch_all, KNOWN_VOLUMES as JMLR_VOL
 from adapters.cvf import fetch_all as cvf_fetch_all, KNOWN_CONFERENCES as CVF_CONFERENCES
 from adapters.ecva import fetch_all as ecva_fetch_all, KNOWN_YEARS as ECVA_YEARS
 from adapters.dblp import fetch_all as dblp_fetch_all, DBLP_VENUES
+from adapters.acl import fetch_all as acl_fetch_all
 from adapters.cache import load_cache, save_cache
 from scripts.build_content import build_all
 
 
 def main():
     parser = argparse.ArgumentParser(description="Fetch ML proceedings metadata")
-    parser.add_argument("--source", choices=["pmlr", "openreview", "neurips", "jmlr", "cvf", "ecva", "dblp", "all"], default="all",
+    parser.add_argument("--source", choices=["pmlr", "openreview", "neurips", "jmlr", "cvf", "ecva", "dblp", "acl", "all"], default="all",
                         help="Which source to fetch from")
     parser.add_argument("--quick", action="store_true",
                         help="Quick mode: fetch only the latest volume per venue")
@@ -150,6 +151,10 @@ def _fetch(args, output_dir: Path) -> None:
 
         logging.info(f"Fetching {len(years)} ECVA/ECCV years...")
         ecva_fetch_all(years=years, output_dir=output_dir, cache=cache)
+
+    if args.source in ("acl", "all"):
+        logging.info("Fetching ACL Anthology (main conferences + Findings)...")
+        acl_fetch_all(output_dir=output_dir, cache=cache, quick=args.quick)
 
     if args.source == "dblp":
         dblp_venues = [args.dblp_venue] if args.dblp_venue else list(DBLP_VENUES.keys())

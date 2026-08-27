@@ -17,6 +17,7 @@ on:
           - neurips
           - jmlr
           - dblp
+          - acl
       quick:
         description: 'Quick mode (latest volume per venue only)'
         required: false

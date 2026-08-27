@@ -220,3 +220,105 @@ misc:
   short: "Notable Works"
   name: "Notable Works"
   type: misc
+
+# --- ACL Anthology venues (adapters/acl.py) ---
+
+acl:
+  short: "ACL"
+  name: "Annual Meeting of the Association for Computational Linguistics"
+  type: conference
+
+emnlp:
+  short: "EMNLP"
+  name: "Conference on Empirical Methods in Natural Language Processing"
+  type: conference
+
+naacl:
+  short: "NAACL"
+  name: "North American Chapter of the Association for Computational Linguistics"
+  type: conference
+
+eacl:
+  short: "EACL"
+  name: "European Chapter of the Association for Computational Linguistics"
+  type: conference
+
+aacl:
+  short: "AACL"
+  name: "Asia-Pacific Chapter of the Association for Computational Linguistics"
+  type: conference
+
+coling:
+  short: "COLING"
+  name: "International Conference on Computational Linguistics"
+  type: conference
+
+lrec-coling:
+  short: "LREC-COLING"
+  name: "Joint International Conference on Computational Linguistics, Language Resources and Evaluation"
+  type: conference
+
+conll:
+  short: "CoNLL"
+  name: "Conference on Computational Natural Language Learning"
+  type: conference
+
+lrec:
+  short: "LREC"
+  name: "International Conference on Language Resources and Evaluation"
+  type: conference
+
+ijcnlp:
+  short: "IJCNLP"
+  name: "International Joint Conference on Natural Language Processing"
+  type: conference
+
+anlp:
+  short: "ANLP"
+  name: "Conference on Applied Natural Language Processing"
+  type: conference
+
+hlt:
+  short: "HLT"
+  name: "Human Language Technology Conference"
+  type: conference
+
+tacl:
+  short: "TACL"
+  name: "Transactions of the Association for Computational Linguistics"
+  type: journal
+
+cl:
+  short: "CL"
+  name: "Computational Linguistics"
+  type: journal
+
+findings-acl:
+  short: "Findings of ACL"
+  name: "Findings of the Association for Computational Linguistics: ACL"
+  type: conference
+
+findings-emnlp:
+  short: "Findings of EMNLP"
+  name: "Findings of the Association for Computational Linguistics: EMNLP"
+  type: conference
+
+findings-naacl:
+  short: "Findings of NAACL"
+  name: "Findings of the Association for Computational Linguistics: NAACL"
+  type: conference
+
+findings-eacl:
+  short: "Findings of EACL"
+  name: "Findings of the Association for Computational Linguistics: EACL"
+  type: conference
+
+findings-ijcnlp:
+  short: "Findings of IJCNLP"
+  name: "Findings of the Association for Computational Linguistics: IJCNLP"
+  type: conference
+
+findings-aacl:
+  short: "Findings of AACL"
+  name: "Findings of the Association for Computational Linguistics: AACL"
+  type: conference

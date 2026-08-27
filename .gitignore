@@ -212,3 +212,6 @@ hugo/resources/
 hugo/.hugo_build.lock
 hugo/content/
 .DS_Store
+
+# ACL Anthology working clone (adapters/acl.py)
+data/.acl-anthology/

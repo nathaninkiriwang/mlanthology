@@ -59,6 +59,26 @@ NAMES: dict[str, str] = {
     "uai": "Conference on Uncertainty in Artificial Intelligence",
     "wacv": "IEEE/CVF Winter Conference on Applications of Computer Vision",
     "wacvw": "IEEE/CVF Winter Conference on Applications of Computer Vision Workshops",
+    # --- ACL Anthology ---
+    "acl": "Annual Meeting of the Association for Computational Linguistics",
+    "emnlp": "Conference on Empirical Methods in Natural Language Processing",
+    "naacl": "North American Chapter of the Association for Computational Linguistics",
+    "eacl": "European Chapter of the Association for Computational Linguistics",
+    "aacl": "Asia-Pacific Chapter of the Association for Computational Linguistics",
+    "coling": "International Conference on Computational Linguistics",
+    "conll": "Conference on Computational Natural Language Learning",
+    "lrec": "International Conference on Language Resources and Evaluation",
+    "ijcnlp": "International Joint Conference on Natural Language Processing",
+    "anlp": "Conference on Applied Natural Language Processing",
+    "hlt": "Human Language Technology Conference",
+    "tacl": "Transactions of the Association for Computational Linguistics",
+    "cl": "Computational Linguistics",
+    "findings-acl": "Findings of the Association for Computational Linguistics: ACL",
+    "findings-emnlp": "Findings of the Association for Computational Linguistics: EMNLP",
+    "findings-naacl": "Findings of the Association for Computational Linguistics: NAACL",
+    "findings-eacl": "Findings of the Association for Computational Linguistics: EACL",
+    "findings-ijcnlp": "Findings of the Association for Computational Linguistics: IJCNLP",
+    "findings-aacl": "Findings of the Association for Computational Linguistics: AACL",
 }
 
 FAMILIES: dict[str, tuple[str, ...]] = {
@@ -74,6 +94,9 @@ FAMILIES: dict[str, tuple[str, ...]] = {
     "health": ("chil", "mlhc", "midl"),
     "graphs": ("log",),
     "causal": ("clear",),
+    "nlp": (
+        "acl", "emnlp", "naacl", "eacl", "aacl", "coling", "conll", "lrec", "ijcnlp", "anlp", "hlt", "tacl", "cl", "findings-acl", "findings-emnlp", "findings-naacl", "findings-eacl", "findings-ijcnlp", "findings-aacl",
+    ),
 }
 
 # venue -> family, for annotating a venue listing.
