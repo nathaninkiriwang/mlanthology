@@ -1,8 +1,11 @@
 name: Update ML Anthology
 
 on:
-  schedule:
-    - cron: '0 0 1 */3 *'  # Quarterly on 1st of Jan, Apr, Jul, Oct at midnight UTC
+  # Schedule REMOVED deliberately (2026-08-27). The corpus is refreshed by the
+  # local launchd agent com.local.mlarefresh, which is the single writer: two
+  # independent writers on one branch diverge, and a diverged branch needs a
+  # human. The local run also gets further — OpenReview answers a residential
+  # IP but returned 429 to these runners. Dispatch manually as a fallback.
   workflow_dispatch:
     inputs:
       source:

@@ -9,8 +9,11 @@ index:  ## Build the FTS5 index from ../data (skips if already current)
 reindex:  ## Force a rebuild even if the corpus has not moved
 	$(UV) run mla index --force
 
-refresh:  ## Pull upstream's quarterly data refresh, then rebuild
-	git -C .. fetch upstream && git -C .. merge --ff-only upstream/main && $(UV) run mla index
+refresh:  ## Pull this fork's latest corpus data, then rebuild the index
+	# origin, not upstream: upstream lacks the ACL adapter and this fork has diverged
+	# from it, so --ff-only against upstream can never succeed. The scheduled
+	# com.local.mlarefresh agent does this automatically; this stays for manual use.
+	git -C .. fetch origin && git -C .. merge --ff-only origin/main && $(UV) run mla index
 
 doctor:  ## Is the index present, fresh, and answering?
 	$(UV) run mla doctor
