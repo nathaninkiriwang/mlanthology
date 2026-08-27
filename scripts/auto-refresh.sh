@@ -107,4 +107,31 @@ print(f"  lock: papers={block.get('papers')} sha={str(block.get('corpus_sha'))[:
 PY
 [ $? -eq 0 ] && log "kernel.lock mla block re-recorded" || log "WARN lock update failed"
 
+# 6. Commit that lock change — but ONLY when kernel.lock is the sole modification on a
+#    clean main. Otherwise the weekly run leaves a dirty harness tree every Monday, which
+#    is not hands-off; and committing into a branch mid-campaign would be worse. When the
+#    tree is busy we skip and say so, and the change simply rides along with the chair's
+#    next `kernel doctor --probe`. Note `kernel` is a .zshrc FUNCTION and does not exist
+#    under launchd, so it is invoked through uv.
+cd "$KERNEL" || exit 0
+BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+CHANGED=$(git status --porcelain 2>/dev/null | awk '{print $NF}' | tr '\n' ' ' | sed 's/ *$//')
+if [ "$BRANCH" = "main" ] && [ "$CHANGED" = "kernel.lock" ]; then
+    if KERNEL_ROLE=build uv run --quiet --project "$KERNEL" kernel commit \
+         -m "[build @ MR-0000] record: weekly corpus refresh — mla lock block re-probed by com.local.mlarefresh (papers/corpus_sha/commit follow the corpus; per-block merge, D-053, so no other capability is touched)" \
+         >>"$LOG" 2>&1; then
+        if git push -q origin HEAD 2>>"$LOG"; then
+            log "kernel.lock committed and pushed"
+        else
+            log "WARN kernel.lock committed, push failed"
+        fi
+    else
+        log "WARN kernel.lock commit failed — tree left modified"
+    fi
+elif [ -z "$CHANGED" ]; then
+    log "kernel.lock unchanged"
+else
+    log "SKIP lock commit — harness busy (branch=$BRANCH, changed: $CHANGED); lock left modified"
+fi
+
 log "=== refresh done ==="
