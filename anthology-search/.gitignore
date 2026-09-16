@@ -3,3 +3,8 @@ index/
 __pycache__/
 *.pyc
 .pytest_cache/
+# the retrieval evaluation's derived artifacts (D-106): runs, logs, results
+eval/runs/
+eval/*.out
+eval/*.log
+eval/results.json

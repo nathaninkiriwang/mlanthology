@@ -94,6 +94,31 @@ else
     log "ERROR reindex failed — searches will answer from the previous index"
 fi
 
+# 4b. The hybrid lanes (mla 0.2.0, D-107): rebuild the stemmed BM25 lane (~20 s) and top the
+#     DEFAULT dense lane up — incremental by citekey, so a weekly delta embeds a weekly delta.
+#     Lane work is skipped, with a line, when the `hybrid` extra is not installed or no default
+#     lane is marked; it never fails the refresh. ONE embedding job at a time on this machine:
+#     the build refuses to start while another `mla vec build` or eval embed is live.
+if uv run --quiet --directory "$SEARCH" python -c "import bm25s, numpy, Stemmer" 2>/dev/null; then
+    if uv run --quiet --directory "$SEARCH" mla bm25 build >>"$LOG" 2>&1; then
+        log "bm25 lane rebuilt"
+    else
+        log "WARN bm25 lane rebuild failed — hybrid searches answer from the previous lane"
+    fi
+    DENSE=$(cat "$SEARCH/index/vec/DEFAULT" 2>/dev/null || true)
+    if [ -z "$DENSE" ]; then
+        log "no default dense lane marked (mla vec default <model>) — vectors not refreshed"
+    elif pgrep -f "mla vec build|eval/embed.py" >/dev/null 2>&1; then
+        log "SKIP dense lane top-up — another embedding job is live"
+    elif uv run --quiet --directory "$SEARCH" mla vec build --model "$DENSE" --quiet >>"$LOG" 2>&1; then
+        log "dense lane $DENSE topped up"
+    else
+        log "WARN dense lane $DENSE top-up failed — hybrid searches answer from the previous vectors"
+    fi
+else
+    log "hybrid extra not installed — lanes not refreshed (uv sync --extra hybrid)"
+fi
+
 # 5. Re-record ONLY the mla block in kernel.lock (D-053 per-block merge). A full
 #    `doctor --probe` would also re-probe every roster model and rewrite unrelated
 #    blocks, which an unattended job has no business doing.

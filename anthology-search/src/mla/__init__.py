@@ -11,8 +11,12 @@ compiles it into a SQLite FTS5 index and exposes it three ways:
 
 Nothing here reaches the network. A search is a local SQLite read, so it cannot 429,
 cannot rate-limit a sweep, and answers in single-digit milliseconds.
+
+0.2.0 (D-107): the hybrid lanes — ``mla.hybrid`` adds a stemmed BM25 lane, dense lanes per
+embedding model, guarded fusion and a reranker behind the optional ``hybrid`` extra
+(``mla search --mode hybrid``, ``mla batch``, ``mla rerank``). The stdlib path is unchanged.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 CORPUS_NAME = "mlanthology"

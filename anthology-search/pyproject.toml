@@ -1,12 +1,23 @@
 [project]
 name = "mla"
-version = "0.1.0"
+version = "0.2.0"
 description = "Offline venue-complete ML literature search over the ML Anthology corpus"
 requires-python = ">=3.11"
 dependencies = []                 # stdlib only: sqlite3 (FTS5), json, gzip, argparse
 
 [project.optional-dependencies]
 mcp = ["mcp>=1.2"]                # only for the secondary `mla-mcp` entry point
+# The hybrid lanes (0.2.0, D-107): `mla search --mode bm25|dense|hybrid`, `mla batch`,
+# `mla rerank`, `mla bm25 build`, `mla vec build`. Also what eval/ runs on.
+hybrid = [
+    "bm25s>=0.3.11",
+    "einops>=0.8.2",
+    "numpy>=2.4.6",
+    "pystemmer>=3.1.0",
+    "sentence-transformers>=3.0",
+    "torch>=2.4",
+    "transformers>=4.51",
+]
 
 [project.scripts]
 mla = "mla.cli:main"

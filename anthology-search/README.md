@@ -42,8 +42,31 @@ mla bibtex <citekey>...      # BibTeX with canonical venue names
 mla venues [--text] [--family F]
 mla stats                    # provenance + field coverage
 mla index [--force]          # build or refresh
-mla doctor                   # present, fresh, and answering?
+mla doctor                   # present, fresh, and answering? (reports the lanes too)
 ```
+
+**The hybrid lanes (0.2.0).** Installed with `uv sync --extra hybrid` (numpy, bm25s, PyStemmer,
+sentence-transformers, torch); without the extra every command above is unchanged and the lane
+commands say so (exit 4, with the fix). Measured on this corpus first — the evaluation program
+in `eval/` and its report decide what runs here (kernel-build/SEARCH-EVAL.md).
+
+```bash
+mla bm25 build                          # a stemmed BM25 lane beside the FTS index (~20 s)
+mla vec build --model qwen3-0.6b        # one vector per paper; incremental by citekey
+        [--backend hf|ollama|hashed] [--batch N] [--fp16|--bf16] [--limit N] [--default]
+mla vec default <model>                 # the lane `--mode hybrid` uses when none is named
+mla vec status                          # which lanes exist, how many papers each covers
+mla search "<query>" --mode fts|bm25|dense|hybrid [--dense MODEL] [--rerank N]
+mla batch [--file spec.json] [--mode hybrid] [-n N]     # many queries, one process (stdin JSON)
+mla rerank --query "<text>" [--model qwen3-0.6b|bge-m3] [--file pool.json]   # score a pool once
+```
+
+`--mode hybrid` is the measured guarded fusion: each lane's top-5 is seated first, then
+reciprocal-rank fusion, so neither lane can be silenced by the other's agreement. Every filter
+applies INSIDE the lanes (as a row mask), never as a post-filter that loses recall. Hits in the
+lane modes carry `lanes: {bm25: rank, dense: rank}` and `score` (the fusion score); the payload
+carries `totals` per lane and `unknown_terms` (stems the BM25 lane never saw). The `fts` mode —
+the default — is the exact-term lane and keeps the no-stemming contract below.
 
 **MCP (secondary).** `uv run --extra mcp mla-mcp` serves `mla_search`, `mla_get`,
 `mla_resolve_doi`, `mla_venues` over stdio, for seats that mount MCP servers and have no
@@ -54,9 +77,10 @@ subprocess boundary it can log and an exit code it can branch on.
 
 ## Search behaviour worth knowing
 
-- **No stemming, deliberately.** `learning` does not match `learnable`. A stemmer would
-  quietly widen a query past what was recorded. Widen explicitly instead: `eigen*`,
-  `--any`, `"quoted phrase"`.
+- **No stemming in the `fts` lane, deliberately.** `learning` does not match `learnable`. A
+  stemmer would quietly widen a query past what was recorded. Widen explicitly instead:
+  `eigen*`, `--any`, `"quoted phrase"` — or ask a different lane: `--mode bm25` stems and
+  `--mode hybrid` adds vectors, and the payload's `mode` records which lane answered.
 - **Hyphens and diacritics fold on their own.** `entry-wise` = `entrywise`; `--author
   scholkopf` finds Schölkopf; `lukasz` finds Łukasz.
 - **A typo'd venue is refused, not answered empty** (exit 3, with the known list). A silent
