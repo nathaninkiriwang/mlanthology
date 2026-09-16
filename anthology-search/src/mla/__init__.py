@@ -17,6 +17,6 @@ embedding model, guarded fusion and a reranker behind the optional ``hybrid`` ex
 (``mla search --mode hybrid``, ``mla batch``, ``mla rerank``). The stdlib path is unchanged.
 """
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 CORPUS_NAME = "mlanthology"

@@ -247,6 +247,23 @@ def cmd_get(args) -> int:
     return EXIT_OK
 
 
+def cmd_lookup(args) -> int:
+    """Many papers in one call (0.2.1, D-108): `{"papers": {citekey: paper}, "missing": [...]}`,
+    abstracts included — what a selector over a sweep's top-N needs without N subprocesses."""
+    connection = connect(args.index)
+    papers: dict = {}
+    missing: list[str] = []
+    for citekey in dict.fromkeys(args.citekeys):
+        paper = get(connection, citekey, abstracts=True)
+        if paper is None:
+            missing.append(citekey)
+        else:
+            papers[citekey] = paper
+    _emit({"provider": "mla", "corpus": corpus_stamp(connection), "found": len(papers),
+           "papers": papers, "missing": missing})
+    return EXIT_OK
+
+
 def cmd_doi(args) -> int:
     connection = connect(args.index)
     paper = by_doi(connection, args.doi)
@@ -598,6 +615,10 @@ def build_parser() -> argparse.ArgumentParser:
     get_cmd = sub.add_parser("get", help="one paper by citekey")
     get_cmd.add_argument("citekey")
     get_cmd.set_defaults(func=cmd_get)
+
+    lookup_cmd = sub.add_parser("lookup", help="many papers by citekey in one call (abstracts included)")
+    lookup_cmd.add_argument("citekeys", nargs="+")
+    lookup_cmd.set_defaults(func=cmd_lookup)
 
     doi_cmd = sub.add_parser("doi", help="resolve a DOI against the corpus")
     doi_cmd.add_argument("doi")

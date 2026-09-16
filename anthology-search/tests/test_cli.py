@@ -170,3 +170,12 @@ def test_search_against_a_missing_index_exits_no_index(tmp_path, capsys):
     code = main(["--index", str(tmp_path / "gone.sqlite3"), "search", "x"])
     assert code == EXIT_NO_INDEX
     assert "mla index" in capsys.readouterr().err
+
+
+def test_lookup_returns_many_papers_with_abstracts_and_names_the_missing(run):
+    """0.2.1 (D-108): one call for a sweep's top-N — the selector's abstracts."""
+    code, out, _ = run("lookup", "scholkopf2001neurips-kernel", "angluin1988colt-learning", "nobody-here")
+    body = payload(out)
+    assert code == 0 and body["found"] == 2 and body["missing"] == ["nobody-here"]
+    assert "abstract" in body["papers"]["scholkopf2001neurips-kernel"]
+    assert body["papers"]["angluin1988colt-learning"]["abstract"] == ""

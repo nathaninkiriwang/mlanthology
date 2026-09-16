@@ -125,7 +125,8 @@ def run_rerank(rname, base, depth=100, resume=False):
     import torch
     from embed import corpus
     ids, texts = corpus(); text_of = dict(zip(ids, texts))
-    device = "mps" if torch.backends.mps.is_available() else "cpu"
+    import os
+    device = os.environ.get("EVAL_DEVICE") or ("mps" if torch.backends.mps.is_available() else "cpu")
     base_run = load_run(base); qs = {q["qid"]: q for q in queries()}
     if rname == "qwen3-0.6b":
         from transformers import AutoModelForCausalLM, AutoTokenizer

@@ -1,6 +1,6 @@
 [project]
 name = "mla"
-version = "0.2.0"
+version = "0.2.1"
 description = "Offline venue-complete ML literature search over the ML Anthology corpus"
 requires-python = ">=3.11"
 dependencies = []                 # stdlib only: sqlite3 (FTS5), json, gzip, argparse

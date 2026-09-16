@@ -4,7 +4,7 @@
 larger models are measured before they are committed to hours of compute). Query-side prefixes
 live here too (PROMPTS) so retrieve.py encodes queries the way each model expects.
 """
-import argparse, json, sqlite3, sys, time
+import argparse, json, os, sqlite3, sys, time
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -81,7 +81,7 @@ def load_model(name: str, fp16: bool, backend: str = "hf", bf16: bool = False):
 def _load_hf(name: str, fp16, bf16: bool = False):
     import torch
     from sentence_transformers import SentenceTransformer
-    device = "mps" if torch.backends.mps.is_available() else "cpu"
+    device = os.environ.get("EVAL_DEVICE") or ("mps" if torch.backends.mps.is_available() else "cpu")
     kwargs = {"trust_remote_code": True, "device": device}
     if bf16:
         kwargs["model_kwargs"] = {"torch_dtype": torch.bfloat16}
