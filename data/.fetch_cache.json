@@ -2,6 +2,7 @@
   "fetched": [
     "aclanth-aacl-2020",
     "aclanth-aacl-2022",
+    "aclanth-aacl-2026",
     "aclanth-acl-1979",
     "aclanth-acl-1980",
     "aclanth-acl-1981",
@@ -184,6 +185,7 @@
     "aclanth-emnlp-2025",
     "aclanth-emnlp-2026",
     "aclanth-findings-aacl-2022",
+    "aclanth-findings-aacl-2026",
     "aclanth-findings-acl-2021",
     "aclanth-findings-acl-2022",
     "aclanth-findings-acl-2023",
@@ -599,5 +601,5 @@
     "wacv-2024",
     "wacv-2025"
   ],
-  "updated": "2026-11-01T05:01:05.103280"
+  "updated": "2026-11-08T05:01:19.718049"
 }
