@@ -33,6 +33,7 @@ PMLR_WEB = "https://proceedings.mlr.press"
 # This is the authoritative mapping — we can extend it or auto-discover.
 KNOWN_VOLUMES = [
     # ICML
+    (306, "ICML", "2026"),
     (267, "ICML", "2025"),
     (235, "ICML", "2024"),
     (202, "ICML", "2023"),
@@ -47,6 +48,7 @@ KNOWN_VOLUMES = [
     (32, "ICML", "2014"),
     (28, "ICML", "2013"),
     # AISTATS
+    (300, "AISTATS", "2026"),
     (258, "AISTATS", "2025"),
     (238, "AISTATS", "2024"),
     (206, "AISTATS", "2023"),
@@ -134,6 +136,7 @@ KNOWN_VOLUMES = [
     # CoLLAs
     (330, "CoLLAs", "2025"),
     # ALT (2017-2025 on PMLR; pre-2017 Springer LNAI via DBLP legacy)
+    (313, "ALT", "2026"),
     (272, "ALT", "2025"),
     (237, "ALT", "2024"),
     (201, "ALT", "2023"),
