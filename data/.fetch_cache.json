@@ -445,6 +445,7 @@
     "jmlr-v24",
     "jmlr-v25",
     "jmlr-v26",
+    "jmlr-v27",
     "jmlr-v3",
     "jmlr-v4",
     "jmlr-v5",
@@ -551,9 +552,12 @@
     "pmlr-v29",
     "pmlr-v291",
     "pmlr-v30",
+    "pmlr-v300",
     "pmlr-v304",
     "pmlr-v305",
+    "pmlr-v306",
     "pmlr-v31",
+    "pmlr-v313",
     "pmlr-v315",
     "pmlr-v32",
     "pmlr-v33",
@@ -601,5 +605,5 @@
     "wacv-2024",
     "wacv-2025"
   ],
-  "updated": "2026-11-15T05:01:19.538032"
+  "updated": "2026-11-18T22:09:51.406958"
 }
